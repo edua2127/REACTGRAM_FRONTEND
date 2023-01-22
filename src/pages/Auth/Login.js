@@ -6,17 +6,31 @@ import Message from "../../components/Message/Message"
 
 // HOOKS
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 
 // REDUX
 import { useSelector, useDispatch } from "react-redux";
+import { login, reset } from "../../slices/authSlice";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const dispatch = useDispatch();
+  const { loading, error } = useSelector(state => state.auth);
+
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    const user = {
+      email,
+      password
+    }
+    dispatch(login(user));
   }
+
+  useEffect(() => {
+    dispatch(reset());
+  }, [dispatch]);
+
   return (
     <div id="login">
       <h2>ReactGram</h2>
@@ -28,7 +42,9 @@ const Login = () => {
         <input type="password" placeholder="Senha"
           value={password || ""} onChange={(e) => setPassword(e.target.value)}
         />
-        <button type="submit">Entrar</button>
+        {loading && <input type="submit" value="Aguarde" disabled />}
+        {!loading && <input type="submit" value="Login" />}
+        {error && <Message msg={error} type="error" />}
       </form>
       <p>Não tem uma conta? <Link to={"/register"}>Clique aqui</Link></p>
     </div>
