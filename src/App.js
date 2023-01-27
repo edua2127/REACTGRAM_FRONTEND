@@ -10,6 +10,8 @@ import Home from './pages/Home/Home';
 import Login from './pages/Auth/Login';
 import Register from './pages/Auth/Register';
 import EditProfile from './pages/EditProfile/EditProfile';
+import Profile from './pages/Profile/Profile';
+import Photo from './pages/Photo/Photo';
 // COMPONENTS
 
 import Navbar from './components/Navbar/Navbar';
@@ -29,6 +31,8 @@ function App() {
             <Route path="/login" element={auth ? <Navigate to={"/"} /> : <Login />} />
             <Route path="/register" element={auth ? <Navigate to={"/"} /> : <Register />} />
             <Route path="/profile" element={auth ? <EditProfile /> : <Navigate to={"/login"} />} />
+            <Route path="/users/:id" element={auth ? <Profile /> : <Navigate to={"/login"} />} />
+            <Route path="/photos/:id" element={auth ? <Photo /> : <Navigate to={"/login"} />} />
           </Routes>
         </div>
         <Footer />
