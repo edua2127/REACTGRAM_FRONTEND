@@ -55,10 +55,10 @@ export const deletePhoto = createAsyncThunk(
 
 // update a photo
 export const updatePhoto = createAsyncThunk(
-  "photo/update", async (photoData, thunkAPI) => {
+  "photo/update", async (commnentData, thunkAPI) => {
     const token = thunkAPI.getState().auth.user.token;
-    console.log(photoData)
-    const data = await photoService.updatePhoto({ title: photoData.title }, photoData.id, token);
+    console.log(commnentData)
+    const data = await photoService.updatePhoto({ title: commnentData.title }, commnentData.id, token);
 
     if (data.errors) {
       return thunkAPI.rejectWithValue(data.errors[0]);
@@ -75,14 +75,38 @@ export const getPhoto = createAsyncThunk(
   }
 )
 
-export const like = createAsyncThunk(
-  "photo/like", async (id, thunkAPI) => {
-    const token = thunkAPI.getState().auth.user.token;
-    const data = await photoService.like(id, token)
+export const like = createAsyncThunk("photo/like", async (id, thunkAPI) => {
+  const token = thunkAPI.getState().auth.user.token;
 
-    if (data.errors) {
-      return thunkAPI.rejectWithValue(data.errors[0]);
-    }
+  const data = await photoService.like(id, token);
+
+  // Check for errors
+  if (data.errors) {
+    return thunkAPI.rejectWithValue(data.errors[0]);
+  }
+
+  return data;
+});
+
+// add comment to a photo
+export const comment = createAsyncThunk("photo/comment", async (commnentData, thunkAPI) => {
+  const token = thunkAPI.getState().auth.user.token;
+
+  const data = await photoService.comment({ comment: commnentData.comment }, commnentData.id, token);
+
+  // Check for errors
+  if (data.errors) {
+    return thunkAPI.rejectWithValue(data.errors[0]);
+  }
+
+  return data;
+})
+
+export const getAllPhotos = createAsyncThunk("photo/getAll",
+  async (_, thunkAPI) => {
+    const token = thunkAPI.getState().auth.user.token;
+    const data = await photoService.getAllPhotos(token)
+
     return data
   }
 )
@@ -181,20 +205,44 @@ export const photoSlice = createSlice({
         state.loading = false;
         state.success = true;
         state.error = null;
+
         if (state.photo.likes) {
-          state.photo.likes.push(action.payload.userId)
+          state.photo.likes.push(action.payload.userId);
         }
 
         state.photos.map((photo) => {
-          if (photo._id === action.payload.photo.photoId) {
-            return photo.likes.push(action.payload.userId)
+          if (photo._id === action.payload.photoId) {
+            return photo.likes.push(action.payload.userId);
           }
-          return photo
-        })
+          return photo;
+        });
+
+        state.message = action.payload.message;
       })
       .addCase(like.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      .addCase(comment.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.error = null;
+        state.photo.comments.push(action.payload.comment)
+        state.message = action.payload.message;
+      })
+      .addCase(comment.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(getAllPhotos.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getAllPhotos.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.error = null;
+        state.photos = action.payload;
       })
   }
 })

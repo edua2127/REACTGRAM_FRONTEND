@@ -51,7 +51,7 @@ const Profile = () => {
   const resetComponentsMessage = () => {
     setTimeout(() => {
       dispatch(resetMessage())
-    })
+    }, 2000)
   }
 
   const handleSubmit = (e) => {
